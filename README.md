@@ -43,3 +43,4 @@ Limitations
 3. Features that require local URL references, such as `<use href="#blah">`, do not work.
 4. Event listeners do not work.
 5. The script only works in a recent Firefox Nightly build that has the `dom.webcomponents.enabled` pref set to `true`.
+6. All elements within a `<graphics>` subtree must have explicit closing tags.
