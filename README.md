@@ -7,6 +7,8 @@ Usage
 Include `<script src="new-svg-dom.js"></script>` early on in your HTML
 document.  Then, you can write inline SVG using `<graphics>` elements.
 
+You can point your `<script>` element to https://raw.githubusercontent.com/heycam/new-svg-dom/master/new-svg-dom.js if you want to avoid downloading the file.
+
 There are four options for reflecting length-typed attributes, illustrated here by how `x` is reflected on a `<rect>` element:
 
 * "string" (the default): `SVG2RectElement.x` is a string that reflects the DOM attribute value
