@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<script>var gLengthReflection = "number";</script>
+<script src="../new-svg-dom.js"></script>
+<h1>Moving rects (using the "number" reflection of lengths)</h1>
+<graphics width="300" height="200">
+</graphics>
+<script>
+function color(i) {
+  var n = Math.floor(255 * i / 10);
+  return "rgb(" + n + ", 0, 0)";
+}
+
+var g = document.querySelector("graphics");
+var rects = [];
+for (var i = 0; i < 10; i++) {
+  // This createElement call is shorter than the createElementNS call used
+  // in moving-rects-0.html.
+  var r = document.createElement("rect");
+
+  // We can't assign a string with a unit, so we need to keep using
+  // setAttribute.
+  r.setAttribute("x", i + "em");
+  r.setAttribute("y", i + "em");
+  // But these two can use a simple assignment.
+  r.width = 20;
+  r.height = 20;
+
+  r.style.fill = color(i);
+  g.appendChild(r);
+  rects.push(r);
+}
+
+function update() {
+  for (var i = 0; i < 10; i++) {
+    // Since the .x and .y values are returned as numbers, we can manipulate
+    // them easily.
+    rects[i].x += Math.random() - 0.5;
+    rects[i].y += Math.random() - 0.5;
+  }
+  requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+</script>

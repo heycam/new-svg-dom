@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<script>var gLengthReflection = "string-and-number";</script>
+<script src="../new-svg-dom.js"></script>
+<h1>Moving rects (using the "string-and-number" reflection of lengths)</h1>
+<graphics width="300" height="200">
+</graphics>
+<script>
+function color(i) {
+  var n = Math.floor(255 * i / 10);
+  return "rgb(" + n + ", 0, 0)";
+}
+
+var g = document.querySelector("graphics");
+var rects = [];
+for (var i = 0; i < 10; i++) {
+  // This createElement call is shorter than the createElementNS call used
+  // in moving-rects-0.html.
+  var r = document.createElement("rect");
+
+  // The .x etc. accessors provide string access.
+  r.x = i + "em";
+  r.y = i + "em";
+  r.width = "20";
+  r.height = "20";
+
+  r.style.fill = color(i);
+  g.appendChild(r);
+  rects.push(r);
+}
+
+function update() {
+  for (var i = 0; i < 10; i++) {
+    // The .x_px etc. accessors provide numeric access.
+    rects[i].x_px += Math.random() - 0.5;
+    rects[i].y_px += Math.random() - 0.5;
+  }
+  requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+</script>

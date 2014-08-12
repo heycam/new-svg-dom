@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<h1>Moving rects (using the current SVG DOM)</h1>
+<svg width="300" height="200">
+</svg>
+<script>
+function color(i) {
+  var n = Math.floor(255 * i / 10);
+  return "rgb(" + n + ", 0, 0)";
+}
+
+var g = document.querySelector("svg");
+var rects = [];
+for (var i = 0; i < 10; i++) {
+  var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+
+  r.setAttribute("x", i + "em");
+  r.setAttribute("y", i + "em");
+  r.setAttribute("width", "20");
+  r.setAttribute("height", "20");
+
+  r.style.fill = color(i);
+  g.appendChild(r);
+  rects.push(r);
+}
+
+function update() {
+  for (var i = 0; i < 10; i++) {
+    rects[i].x.baseVal.value += Math.random() - 0.5;
+    rects[i].y.baseVal.value += Math.random() - 0.5;
+  }
+  requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+</script>

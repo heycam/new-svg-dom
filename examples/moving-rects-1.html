@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<script src="../new-svg-dom.js"></script>
+<h1>Moving rects (using the "string" reflection of lengths)</h1>
+<graphics width="300" height="200">
+</graphics>
+<script>
+// A big hack; ideally CSS would provide conversion functions (as Tab has
+// proposed) or we could use an SVGLength object to do this conversion.
+function convertLengthToUserUnits(aLength, aContextElement) {
+  aContextElement.style.strokeDashoffset = aLength;
+  var r = parseFloat(getComputedStyle(aContextElement).strokeDashoffset);
+  aContextElement.style.strokeDashoffset = "";
+  return r;
+}
+
+function color(i) {
+  var n = Math.floor(255 * i / 10);
+  return "rgb(" + n + ", 0, 0)";
+}
+
+var g = document.querySelector("graphics");
+var rects = [];
+for (var i = 0; i < 10; i++) {
+  // This createElement call is shorter than the createElementNS call used
+  // in moving-rects-0.html.
+  var r = document.createElement("rect");
+
+  // Assigning strings is a lot shorter than setAttribute calls.
+  r.x = i + "em";
+  r.y = i + "em";
+  r.width = "20";
+  r.height = "20";
+
+  r.style.fill = color(i);
+  g.appendChild(r);
+  rects.push(r);
+}
+
+function update() {
+  for (var i = 0; i < 10; i++) {
+    // Getting a string back from rects[i].x, which in our case is an
+    // "em"-unit value, is difficult to parse without the SVGAnimatedLength
+    // objects to do the work.
+    rects[i].x = convertLengthToUserUnits(rects[i].x, rects[i]) + Math.random() - 0.5;
+    rects[i].y = convertLengthToUserUnits(rects[i].y, rects[i]) + Math.random() - 0.5;
+  }
+  requestAnimationFrame(update);
+}
+
+requestAnimationFrame(update);
+</script>
