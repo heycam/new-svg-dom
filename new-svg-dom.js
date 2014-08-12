@@ -835,6 +835,14 @@ var protos;
           }
           mapSingleAttribute(aRecord.target, shadowNode, aRecord.attributeName);
           break;
+
+        case "characterData":
+          var shadowNode = nodes.get(aRecord.target);
+          if (!shadowNode) {
+            break;
+          }
+          shadowNode.nodeValue = aRecord.target.nodeValue;
+          break;
       }
     });
   });
