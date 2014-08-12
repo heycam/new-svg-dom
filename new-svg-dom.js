@@ -2,6 +2,7 @@
 var protos;
 (function() {
   const kSVGNS = "http://www.w3.org/2000/svg";
+  const kHTMLNS = "http://www.w3.org/1999/xhtml";
   const kXLINKNS = "http://www.w3.org/1999/xlink";
   const kMappedElements = {
     "graphics": "svg",
@@ -41,6 +42,7 @@ var protos;
     "radialgradient": "radialGradient",
     "textpath": "textPath"
   };
+  const kElementsWithSVGPrototypes = new Set("animate animatemotion animatetransform canvas circle clippath cursor defs desc ellipse feblend fecolormatrix fecomponenttransfer fecomposite feconvolvematrix fecustom fediffuselighting fedisplacementmap fedistantlight fedropshadow feflood fefunca fefuncb fefuncg fefuncr fegaussianblur feimage femerge femergenode femorphology feoffset fepointlight fespecularlighting fespotlight fetile feturbulence filter foreignobject g line lineargradient marker mask metadata mpath path pattern polygon polyline radialgradient rect set stop svg switch symbol text textpath title tspan use view".split(" "));
   const kMappedAttributes = {
     "_": {
       "attributename": "attributeName",
@@ -672,6 +674,28 @@ var protos;
   };
 
   Object.defineProperty(HTMLAnchorElement.prototype, "viewportElement", { get: function() { return originalFor(shadowFor(this).viewportElement) } });
+
+  // Patch createElement and createElementNS so that the resulting object has
+  // the right prototype.
+
+  var Document_createElement = Document.prototype.createElement;
+  var Document_createElementNS = Document.prototype.createElementNS;
+
+  Document.prototype.createElement = function(aName) {
+    var e = Document_createElement.call(this, aName);
+    if (kElementsWithSVGPrototypes.has(aName)) {
+      var proto = kPrototypes[aName] || SVG2UnknownElement.prototype;
+      Object.setPrototypeOf(e, proto);
+    }
+    return e;
+  };
+
+  Document.prototype.createElementNS = function(aNamespaceURI, aName) {
+    if (aNamespaceURI == kHTMLNS || aNamespaceURI == null) {
+      return this.createElement(aName);
+    }
+    return Document_createElementNS.call(this, aNamespaceURI, aName);
+  };
 
   // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=1051643.
 
