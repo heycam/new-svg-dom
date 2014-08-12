@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<h1>Moving polygon (using the current SVG DOM)</h1>
+<svg width="300" height="200">
+  <polyline points="50,50 100,150 150,50 200,150 250,50" stroke="crimson" stroke-width="3" fill="none"></polyline>
+</svg>
+<pre style="overflow: hidden"></pre>
+<script>
+var polyline = document.querySelector("polyline");
+var pre = document.querySelector("pre");
+
+var iteration = 0;
+
+function update() {
+  // We have to use getAttribute to get the string form of the attribute.
+  pre.textContent = polyline.getAttribute("points");
+
+  // Loop over each live SVGPoint object and update its x and y.
+  for (var i = 0; i < ps.numberOfItems; i++) {
+    polyline.points.getItem(i).x += Math.random() - 0.5;
+    polyline.points.getItem(i).y += Math.random() - 0.5;
+  }
+
+  // Every couple of seconds add a random point on the end.
+  if (++iteration % 48 == 0) {
+    // To add a new point we create an SVGPoint, set its x and y,
+    // then append it to the SVGPointList.
+    var pt = document.querySelector("svg").createSVGPoint();
+    pt.x = 300 * Math.random();
+    pt.y = 200 * Math.random();
+    polyline.points.appendItem(pt);
+  }
+
+  if (iteration < 480) {
+    // Stop after a while.
+    requestAnimationFrame(update);
+  }
+}
+
+requestAnimationFrame(update);
+</script>

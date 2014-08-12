@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<script src="../new-svg-dom.js"></script>
+<h1>Moving polygon (using the new SVG DOM)</h1>
+<graphics width="300" height="200">
+  <polyline points="50,50 100,150 150,50 200,150 250,50" stroke="crimson" stroke-width="3" fill="none"></polyline>
+</graphics>
+<pre style="overflow: hidden"></pre>
+<script>
+var polyline = document.querySelector("polyline");
+var pre = document.querySelector("pre");
+
+var iteration = 0;
+
+function update() {
+  // The .points accessor reflects the string form of the attribute.
+  pre.textContent = polyline.points;
+
+  // getPoints() returns an Array of { x, y } objects.
+  var ps = polyline.getPoints();
+  for (var i = 0; i < ps.length; i++) {
+    // Update each object.
+    ps[i].x += Math.random() - 0.5;
+    ps[i].y += Math.random() - 0.5;
+  }
+
+  // Every couple of seconds add a random point on the end.
+  if (++iteration % 48 == 0) {
+    // Adding a new point to the Array is a one-liner.
+    ps.push({ x: 300 * Math.random(), y: 200 * Math.random() });
+  }
+
+  // At the end we set the new points.
+  polyline.setPoints(ps);
+
+  if (iteration < 480) {
+    // Stop after a while.
+    requestAnimationFrame(update);
+  }
+}
+
+requestAnimationFrame(update);
+</script>
