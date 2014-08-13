@@ -15,7 +15,7 @@ function update() {
   pre.textContent = polyline.getAttribute("points");
 
   // Loop over each live SVGPoint object and update its x and y.
-  for (var i = 0; i < ps.numberOfItems; i++) {
+  for (var i = 0; i < polyline.points.numberOfItems; i++) {
     polyline.points.getItem(i).x += Math.random() - 0.5;
     polyline.points.getItem(i).y += Math.random() - 0.5;
   }
