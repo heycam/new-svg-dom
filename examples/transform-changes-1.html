@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<script src="../new-svg-dom.js"></script>
+<h1>Transform changes (using the new SVG DOM)</h1>
+<graphics width="800" height="600">
+  <path d="M 100,100 c 0,100 100,0 100,100 c 0,100 100,0 100,100 c 0,100 100,0 100,100"
+        fill="none" stroke="purple" stroke-width="3"
+        transform="rotate(-20) scale(0.5)"></path>
+  <circle cx="300" cy="200" r="50" fill="orange"
+          transform="skewX(30) scale(1,1.5) translate(-50,-100)"></circle>
+  <rect x="100" y="100" width="100" height="100" fill="crimson"
+          transform="translate(0,50)"></rect>
+</graphics>
+<script>
+var graphics = document.querySelector("graphics");
+var animations = [
+  {
+    from: { type: "scale", x: 1, y: 1 },
+    to: { x: 2, y: 2 }
+  },
+  {
+    from: { type: "rotate", angle: 0 },
+    to: { angle: 45 }
+  },
+  {
+    from: { type: "translate", x: 0, y: 0 },
+    to: { x: 100, y: 100 }
+  },
+];
+var animationIndex = 0;
+var animationStartTime = Date.now();
+
+// Append the initial values for each animation transform item on each of
+// the elements being animated.  This will make it easier to update them
+// in update().
+function initialize() {
+  for (var e = graphics.firstElementChild; e; e = e.nextElementSibling) {
+    // Get the current transform item list.
+    var items = e.getTransformItems();
+
+    // Append each of the "from" values for the animations to the Array of
+    // transform items.  We can just push() these directly, since each of
+    // the "from" objects is a plain JS object of the form that
+    // setTransformItems expects.
+    for (var i = 0; i < animations.length; i++) {
+      var animation = animations[i];
+      items.push(animation.from);
+    }
+
+    // Unlike the old SVG DOM, we need to set the whole list of new transform
+    // items here, since it's not live.
+    e.setTransformItems(items);
+  }
+}
+
+// Interpolates between two transform items at the given animation time
+// (between 0 and 2).  The result is set on aTarget.
+function interpolate(aFromItem, aToItem, aAnimationTime, aAnimationIsActive, aTarget) {
+  if (!aAnimationIsActive) {
+    aAnimationTime = 0;
+  }
+  if (aAnimationTime >= 1) {
+    aAnimationTime = 2 - aAnimationTime;
+  }
+  // Because the transform item objects are plain JS objects, we can loop over its
+  // properties and interpolate each one without having to know the structure of
+  // the object.
+  for (var p in aToItem) {
+    var from = aFromItem[p];
+    var to = aToItem[p];
+    aTarget[p] = from + (to - from) * aAnimationTime;
+  }
+}
+
+function update() {
+  // For each animation in |animations|, we'll spend 1s animating to the
+  // "to" values and then 1s animating back to the "from" values.  Each
+  // animation is done in turn, so the whole cycle takes 6s.
+
+  // Time within the whole animation in seconds, [0, 6).
+  var t = (Date.now() - animationStartTime) / 1000 % (animations.length * 2);
+
+  // Time within an individual animation in seconds, [0, 2).
+  var animationTime = t % 2;
+
+  // Only one of the transform items will be changing during the animation;
+  // the others will be set to their "from" values.
+  var activeAnimation = Math.floor(t / 2);
+
+  for (var e = graphics.firstElementChild; e; e = e.nextElementSibling) {
+    // Get the list of transform items on the element as an Array.
+    var items = e.getTransformItems();
+
+    for (var i = 0; i < animations.length; i++) {
+      var animation = animations[i];
+      var animationIsActive = activeAnimation == i;
+
+      // Update each of the animated transform items.
+      var item = items[items.length - animations.length + i];
+      interpolate(animation.from, animation.to, animationTime, animationIsActive, item);
+    }
+
+    // Set the transform item list back on the element.
+    e.setTransformItems(items);
+  }
+
+  requestAnimationFrame(update);
+}
+
+window.onload = function() {
+  initialize();
+  requestAnimationFrame(update);
+};
+</script>
