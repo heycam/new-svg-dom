@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<h1>Transform changes (using the current SVG DOM)</h1>
+<svg width="800" height="600">
+  <path d="M 100,100 c 0,100 100,0 100,100 c 0,100 100,0 100,100 c 0,100 100,0 100,100"
+        fill="none" stroke="purple" stroke-width="3"
+        transform="rotate(-20) scale(0.5)"></path>
+  <circle cx="300" cy="200" r="50" fill="orange"
+          transform="skewX(30) scale(1,1.5) translate(-50,-100)"></circle>
+  <rect x="100" y="100" width="100" height="100" fill="crimson"
+          transform="translate(0,50)"></rect>
+</svg>
+<script>
+var svg = document.querySelector("svg");
+var animations = [
+  {
+    from: { type: "scale", x: 1, y: 1 },
+    to: { type: "scale", x: 2, y: 2 }
+  },
+  {
+    from: { type: "rotate", angle: 0 },
+    to: { type: "rotate", angle: 45 }
+  },
+  {
+    from: { type: "translate", x: 0, y: 0 },
+    to: { type: "translate", x: 100, y: 100 }
+  },
+];
+var animationIndex = 0;
+var animationStartTime = Date.now();
+
+// Append the initial values for each animation transform item on each of
+// the elements being animated.  This will make it easier to update them
+// in update().
+function initialize() {
+  for (var e = svg.firstElementChild; e; e = e.nextElementSibling) {
+    for (var i = 0; i < animations.length; i++) {
+      var animation = animations[i];
+      // We create a new SVGTransform object and set its type and values
+      // based on the |animation.from| object.
+      var item = svg.createSVGTransform();
+      switch (animation.from.type) {
+        case "scale":
+          item.setScale(animation.from.x, animation.from.y);
+          break;
+        case "rotate":
+          item.setRotate(animation.from.angle, 0, 0);
+          break;
+        case "translate":
+          item.setTranslate(animation.from.x, animation.from.y);
+          break;
+      }
+
+      // Append the new item to the live transform item list.
+      e.transform.baseVal.appendItem(item);
+    }
+  }
+}
+
+// Interpolates between two transform items at the given animation time
+// (between 0 and 2).  aFromItem and aToItem are taken from the global
+// |animations| array.  The result is set on aTarget.
+function interpolate(aFromItem, aToItem, aAnimationTime, aAnimationIsActive, aTarget) {
+  if (!aAnimationIsActive) {
+    aAnimationTime = 0;
+  }
+  if (aAnimationTime >= 1) {
+    aAnimationTime = 2 - aAnimationTime;
+  }
+  // We need to interpolate each transform type differently.
+  switch (aFromItem.type) {
+    case "rotate":
+      var from = aFromItem.angle;
+      var to = aToItem.angle;
+      aTarget.setRotate(from + (to - from) * aAnimationTime, 0, 0);
+      break;
+    case "scale":
+      var from_x = aFromItem.x;
+      var to_x = aToItem.x;
+      var from_y = aFromItem.y;
+      var to_y = aToItem.y;
+      aTarget.setScale(from_x + (to_x - from_x) * aAnimationTime,
+                       from_y + (to_y - from_y) * aAnimationTime);
+      break;
+    case "translate":
+      var from_x = aFromItem.x;
+      var to_x = aToItem.x;
+      var from_y = aFromItem.y;
+      var to_y = aToItem.y;
+      aTarget.setTranslate(from_x + (to_x - from_x) * aAnimationTime,
+                           from_y + (to_y - from_y) * aAnimationTime);
+      break;
+  }
+}
+
+function update() {
+  // For each animation in |animations|, we'll spend 1s animating to the
+  // "to" values and then 1s animating back to the "from" values.  Each
+  // animation is done in turn, so the whole cycle takes 6s.
+
+  // Time within the whole animation in seconds, [0, 6).
+  var t = (Date.now() - animationStartTime) / 1000 % (animations.length * 2);
+
+  // Time within an individual animation in seconds, [0, 2).
+  var animationTime = t % 2;
+
+  // Only one of the transform items will be changing during the animation;
+  // the others will be set to their "from" values.
+  var activeAnimation = Math.floor(t / 2);
+
+  for (var e = svg.firstElementChild; e; e = e.nextElementSibling) {
+    // Get the live list of transform items on the element.
+    var items = e.transform.baseVal;
+
+    for (var i = 0; i < animations.length; i++) {
+      var animation = animations[i];
+      var animationIsActive = activeAnimation == i;
+
+      // Update each of the animated transform items.
+      var item = items.getItem(items.numberOfItems - animations.length + i);
+      interpolate(animation.from, animation.to, animationTime, animationIsActive, item);
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+initialize();
+requestAnimationFrame(update);
+</script>
