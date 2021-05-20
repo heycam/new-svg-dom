@@ -18,21 +18,25 @@ There are four options for reflecting length-typed attributes, illustrated here 
 
 Set `gLengthReflection` to the desired option before loading new-svg-dom.js, for example:
 
-```
+```html
 <!DOCTYPE html>
 <script>
 var gLengthReflection = "string-and-number";
 </script>
+
 <script src="new-svg-dom.js"></script>
+
 <graphics width="300" height="200">
   <rect x="10" y="20" width="30" height="40"></rect>
 </graphics>
+
 <script>
 function show(val) {
   alert(val + " (" + typeof val + ")");
 }
-show(document.querySelector("rect").x);     // alerts "10 (string)"
-show(document.querySelector("rect').x_px);  // alerts "10 (number)"
+show(document.querySelector("rect").x);     // alerts '10 (string)'
+show(document.querySelector("rect").x_px);  // alerts '10 (number)'
+</script>
 ```
 
 Limitations
